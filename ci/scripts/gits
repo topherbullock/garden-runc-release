@@ -48,6 +48,7 @@ $GOPATH/bin/guardian \
   --dadoo-bin=$GOPATH/bin/dadoo \
   --nstar-bin=./rundmc/nstar/nstar \
   --tar-bin=/opt/tar \
+  --runc-bin=$GOPATH/bin/runc \
   --depot=$tmpdir/depot \
   --graph=$tmpdir/graph \
   --bind-ip=0.0.0.0 \
