@@ -12,7 +12,7 @@ cd release-merged
 git remote add local $DEVELOP
 
 git fetch local
-git checkout local/develop
+git checkout local/wip-develop
 
 git config --global user.email "ci@localhost"
 git config --global user.name "CI Bot"
