@@ -75,6 +75,8 @@ case $1 in
     export PATH=/var/vcap/packages/shadow/sbin:$PATH
     export PATH=/var/vcap/packages/runc/bin:$PATH
 
+    mount --make-slave /var/vcap/data
+
     depot_path=/var/vcap/data/garden/depot
     mkdir -p $depot_path
 

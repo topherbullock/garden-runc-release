@@ -10,3 +10,9 @@ mkdir -p $shared_dir
 mount --bind $shared_dir $shared_dir
 mount --make-shared $shared_dir
 <% end %>
+
+data_dir=/var/vcap/data
+mkdir -p $data_dir
+mount --bind $data_dir $data_dir
+mount --make-shared $data_dir
+
