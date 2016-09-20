@@ -43,4 +43,4 @@ bosh -n add blob $blob_dir/*.tar.gz ${BLOB_DESTINATION}/${BLOB_NAME}.tar.gz
 bosh -n upload blobs
 
 git add -A
-git commit -m "update ${BLOB_NAME} blob to ${BLOB_VERSION}"`
+git commit -m "update ${BLOB_NAME} blob to ${BLOB_VERSION}"
