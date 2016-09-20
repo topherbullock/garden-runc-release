@@ -14,11 +14,11 @@ params:
   BOSH_PRIVATE_CONFIG:
 
 inputs:
-- name: gr-release-develop
+- name: gr-release
 - name: blob-dir
 
 outputs:
-- name: bumped-gr-release-develop
+- name: bumped-gr-release
 
 run:
-  path: gr-release-develop/ci/scripts/bump-blob
+  path: gr-release/ci/scripts/bump-blob

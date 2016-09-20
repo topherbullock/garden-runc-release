@@ -24,13 +24,13 @@ if [ -n $BLOB_VERSION_FILE ]; then
   BLOB_VERSION=`cat ${blob_dir}/${BLOB_VERSION_FILE}`
 fi
 
-git clone gr-release-develop bumped-gr-release-develop
+git clone gr-release bumped-gr-release
 
 set +x
-echo "$BOSH_PRIVATE_CONFIG" > bumped-gr-release-develop/config/private.yml
+echo "$BOSH_PRIVATE_CONFIG" > bumped-gr-release/config/private.yml
 set -x
 
-cd bumped-gr-release-develop/
+cd bumped-gr-release/
 
 # work-around Go BOSH CLI trying to rename blobs downloaded into ~/.root/tmp
 # into release dir, which is invalid cross-device link
