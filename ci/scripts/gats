@@ -58,4 +58,4 @@ popd
 cd src/code.cloudfoundry.org/garden-integration-tests
 export GARDEN_ADDRESS=$(hostname):7777
 export NESTED=true
-ginkgo -p -nodes=4 "$@"
+# ginkgo -p -nodes=4 "$@"
