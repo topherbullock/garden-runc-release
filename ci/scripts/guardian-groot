@@ -1,0 +1,77 @@
+#!/bin/bash
+# vim: set ft=sh
+set -ex
+
+mount_btrfs() {
+  # Inspired by: https://github.com/cloudfoundry/grootfs/blob/b3f8c6255448ff77e74860aabd925bd9076b762b/ci/scripts/groot-tests.sh
+  # Setup loop devices
+  for i in {0..256}
+  do
+    mknod -m777 /dev/loop$i b 7 $i
+  done
+
+  # Make BTRFS volume
+  truncate -s 1G /btrfs_volume
+  mkfs.btrfs /btrfs_volume
+
+  # Mount BTRFS
+  mkdir /mnt/btrfs
+  mount -t btrfs -o user_subvol_rm_allowed,rw /btrfs_volume /mnt/btrfs
+  chmod 777 -R /mnt/btrfs
+  btrfs quota enable /mnt/btrfs
+}
+sudo_mount_btrfs() {
+  local MOUNT_BTRFS_FUNC=$(declare -f mount_btrfs)
+  sudo bash -c "$MOUNT_BTRFS_FUNC; mount_btrfs"
+}
+
+export GROOTFS_BIN_PATH="$(pwd)/gfs-github-release"
+
+cd $(dirname $0)/../..
+
+export GOROOT=/usr/local/go
+export PATH=$GOROOT/bin:$PATH
+
+export GOPATH=$PWD
+export PATH=$GOPATH/bin:$PATH
+
+pushd src/github.com/opencontainers/runc
+  GOPATH=$PWD/Godeps/_workspace:$GOPATH go build -tags "seccomp apparmor" --ldflags '-extldflags "-static"' -o runc .
+  cp runc /usr/local/bin/runc
+popd
+
+# setup runC
+mkdir -p /var/run/oci
+mount -t tmpfs tmpfs /var/run/oci
+
+# setup AppArmor
+mount -t securityfs securityfs /sys/kernel/security
+if ! aa-status | grep garden-default > /dev/null; then
+  apparmor_parser -a ci/assets/garden-default
+fi
+
+# setup grootfs
+sudo_mount_btrfs
+mkdir -p /opt/grootfs/bin/
+
+pushd "$GROOTFS_BIN_PATH"
+  tar -zxf *.tgz
+  mv grootfs /opt/grootfs/bin/
+  mv drax /opt/grootfs/bin/
+  chmod 755 /opt/grootfs/bin/*
+popd
+echo "I AM GROOT" | grootsay
+
+cd src/code.cloudfoundry.org/guardian
+
+export GARDEN_TEST_ROOTFS=/opt/warden/rootfs
+export GARDEN_FUSE_TEST_ROOTFS=/opt/warden/fuse-rootfs
+export GARDEN_NESTABLE_TEST_ROOTFS=/opt/warden/nestable-rootfs
+export GARDEN_TAR_PATH=/opt/tar
+export GARDEN_TEST_GRAPHPATH=/tmp/aufs_mount
+export GARDEN_DORA_PATH=$PWD/../garden-integration-tests/resources/dora.tgz
+export IMAGE_PLUGIN_PATH=/opt/grootfs/bin/grootfs
+[ -d /opt/warden/docker-registry-v2-rootfs ] && export GARDEN_DOCKER_REGISTRY_V2_TEST_ROOTFS=/opt/warden/docker-registry-v2-rootfs
+
+go vet ./...
+ginkgo -tags daemon -r -p -race -cover -keepGoing -nodes=4 "$@" gqt

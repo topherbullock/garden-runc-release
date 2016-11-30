@@ -1,0 +1,19 @@
+---
+image_resource:
+  type: docker-image
+  source:
+      repository: cfgarden/garden-ci-ubuntu
+      tag: 0.5.0
+
+platform: linux
+
+inputs:
+- name: gr-release-develop
+- name: gfs-github-release
+#- name: gfs-release
+
+run:
+  path: gr-release-develop/ci/scripts/guardian-groot
+
+params:
+  NETWORK_MODULE_PATH:
