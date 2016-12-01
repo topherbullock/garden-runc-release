@@ -10,6 +10,8 @@ platform: linux
 inputs:
 - name: gr-release-develop
 - name: gfs-github-release
+- name: idmapper-master
+  path: src/code.cloudfoundry.org/idmapper
 #- name: gfs-release
 
 run:

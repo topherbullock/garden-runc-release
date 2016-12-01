@@ -1,9 +1,15 @@
 #!/bin/bash
 # vim: set ft=sh
-set -ex
+set -e -x
 
 mount_btrfs() {
   # Inspired by: https://github.com/cloudfoundry/grootfs/blob/b3f8c6255448ff77e74860aabd925bd9076b762b/ci/scripts/groot-tests.sh
+  mount -tcgroup -odevices cgroup:devices /sys/fs/cgroup
+  devices_mount_info=$(cat /proc/self/cgroup | grep devices)
+  devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
+  echo 'b 7:* rwm' > /sys/fs/cgroup/devices.allow
+  echo 'b 7:* rwm' > /sys/fs/cgroup${devices_subdir}/devices.allow
+
   # Setup loop devices
   for i in {0..256}
   do
@@ -14,18 +20,28 @@ mount_btrfs() {
   truncate -s 1G /btrfs_volume
   mkfs.btrfs /btrfs_volume
 
-  # Mount BTRFS
-  mkdir /mnt/btrfs
-  mount -t btrfs -o user_subvol_rm_allowed,rw /btrfs_volume /mnt/btrfs
+  # Mount BTRFS at grootfs's default store path
+  mkdir -p /var/lib/grootfs
+  mount -t btrfs -o user_subvol_rm_allowed,rw /btrfs_volume /var/lib/grootfs
   chmod 777 -R /mnt/btrfs
-  btrfs quota enable /mnt/btrfs
+  btrfs quota enable /var/lib/grootfs
+
+  # chown -R 4294967294:4294967294 /var/lib/grootfs
+  # echo "maximus:x:4294967294:4294967294::/home/maximus:" >> /etc/passwd
 }
 sudo_mount_btrfs() {
   local MOUNT_BTRFS_FUNC=$(declare -f mount_btrfs)
   sudo bash -c "$MOUNT_BTRFS_FUNC; mount_btrfs"
 }
+make_idmapper() {
+  local idmapper_src_path=$1
+  pushd $idmapper_src_path
+    make
+  popd
+}
 
 export GROOTFS_BIN_PATH="$(pwd)/gfs-github-release"
+export IDMAPPER_SRC_PATH="$(pwd)/idmapper-master"
 
 cd $(dirname $0)/../..
 
@@ -52,10 +68,12 @@ fi
 
 # setup grootfs
 sudo_mount_btrfs
+make_idmapper "$IDMAPPER_SRC_PATH"
+exit 1
 mkdir -p /opt/grootfs/bin/
 
 pushd "$GROOTFS_BIN_PATH"
-  tar -zxf *.tgz
+  ls -lf *.tgz | xargs -n1 tar -zxf
   mv grootfs /opt/grootfs/bin/
   mv drax /opt/grootfs/bin/
   chmod 755 /opt/grootfs/bin/*
