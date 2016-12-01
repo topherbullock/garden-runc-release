@@ -1,0 +1,60 @@
+#!/bin/bash
+# vim: set ft=sh
+
+set -e -x
+
+mount_btrfs() {
+  # Inspired by: https://github.com/cloudfoundry/grootfs/blob/b3f8c6255448ff77e74860aabd925bd9076b762b/ci/scripts/groot-tests.sh
+
+  # setup loop devices
+  for i in {0..256}
+  do
+    mknod -m777 /dev/loop$i b 7 $i
+  done
+
+  # make BTRFS volume
+  truncate -s 1G /btrfs_volume
+  mkfs.btrfs /btrfs_volume
+
+  # mount BTRFS at grootfs's default store path
+  mkdir -p /var/lib/grootfs
+  mount -t btrfs -o user_subvol_rm_allowed,rw /btrfs_volume /var/lib/grootfs
+  chmod 777 -R /mnt/btrfs
+  btrfs quota enable /var/lib/grootfs
+
+  chown -R 4294967294:4294967294 /var/lib/grootfs
+}
+
+sudo_mount_btrfs() {
+  local MOUNT_BTRFS_FUNC=$(declare -f mount_btrfs)
+  sudo bash -c "$MOUNT_BTRFS_FUNC; mount_btrfs"
+}
+
+install_idmapper() {
+  local idmapper_src_path=$1
+
+  pushd $idmapper_src_path
+    make
+
+    mv newuidmap newgidmap maximus /opt/grootfs/bin/
+
+    chmod u+s /opt/grootfs/bin/newuidmap
+    chmod u+s /opt/grootfs/bin/newgidmap
+  popd
+}
+
+install_grootfs() {
+  local grootfs_bin_path=$1
+
+  pushd "$grootfs_bin_path"
+    ls -lf *.tgz | xargs -n1 tar -zxf
+
+    mv grootfs /opt/grootfs/bin/
+    mv drax /opt/grootfs/bin/
+
+    chmod 755 /opt/grootfs/bin/grootfs
+    chmod 755 /opt/grootfs/bin/drax
+  popd
+
+  echo "I AM GROOT" | grootsay
+}

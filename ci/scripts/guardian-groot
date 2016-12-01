@@ -2,95 +2,41 @@
 # vim: set ft=sh
 set -e -x
 
-mount_btrfs() {
-  # Inspired by: https://github.com/cloudfoundry/grootfs/blob/b3f8c6255448ff77e74860aabd925bd9076b762b/ci/scripts/groot-tests.sh
-  mount -tcgroup -odevices cgroup:devices /sys/fs/cgroup
-  devices_mount_info=$(cat /proc/self/cgroup | grep devices)
-  devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
-  echo 'b 7:* rwm' > /sys/fs/cgroup/devices.allow
-  echo 'b 7:* rwm' > /sys/fs/cgroup${devices_subdir}/devices.allow
+BUILD_DIR_PATH=$PWD
+GROOTFS_BINS_PATH="$BUILD_DIR_PATH/gfs-github-release"
+IDMAPPER_SRC_PATH="$BUILD_DIR_PATH/src/code.cloudfoundry.org/idmapper"
 
-  # Setup loop devices
-  for i in {0..256}
-  do
-    mknod -m777 /dev/loop$i b 7 $i
-  done
+cd $(dirname $0)/../.. # garden-runc-release dir
 
-  # Make BTRFS volume
-  truncate -s 1G /btrfs_volume
-  mkfs.btrfs /btrfs_volume
-
-  # Mount BTRFS at grootfs's default store path
-  mkdir -p /var/lib/grootfs
-  mount -t btrfs -o user_subvol_rm_allowed,rw /btrfs_volume /var/lib/grootfs
-  chmod 777 -R /mnt/btrfs
-  btrfs quota enable /var/lib/grootfs
-
-  chown -R 4294967294:4294967294 /var/lib/grootfs
-}
-sudo_mount_btrfs() {
-  local MOUNT_BTRFS_FUNC=$(declare -f mount_btrfs)
-  sudo bash -c "$MOUNT_BTRFS_FUNC; mount_btrfs"
-}
-make_idmapper() {
-  local idmapper_src_path=$1
-  pushd $idmapper_src_path
-    make
-    mv newuidmap /opt/grootfs/bin/
-    mv newgidmap /opt/grootfs/bin/
-    mv maximus /opt/grootfs/bin/
-  popd
-}
-
-export GROOTFS_BIN_PATH="$(pwd)/gfs-github-release"
-export IDMAPPER_SRC_PATH="$(pwd)/src/code.cloudfoundry.org/idmapper"
-export BUILD_DIR=$PWD
-
-cd $(dirname $0)/../..
 export GOROOT=/usr/local/go
 export PATH=$GOROOT/bin:$PATH
-
 export GOPATH=$PWD
 export PATH=$GOPATH/bin:$PATH
 
+## *** runc setup *** ##
+mkdir -p /var/run/oci
+mount -t tmpfs tmpfs /var/run/oci
 pushd src/github.com/opencontainers/runc
   GOPATH=$PWD/Godeps/_workspace:$GOPATH go build -tags "seccomp apparmor" --ldflags '-extldflags "-static"' -o runc .
   cp runc /usr/local/bin/runc
 popd
 
-# setup runC
-mkdir -p /var/run/oci
-mount -t tmpfs tmpfs /var/run/oci
-
-# setup AppArmor
+## *** apparmor setup *** ##
 mount -t securityfs securityfs /sys/kernel/security
 if ! aa-status | grep garden-default > /dev/null; then
   apparmor_parser -a ci/assets/garden-default
 fi
 
-# setup grootfs
-mkdir -p /opt/grootfs/bin/
-
+## *** grootfs setup *** ##
+source ci/scripts/snippets/grootfs
+mkdir -p /opt/grootfs/bin
 sudo_mount_btrfs
-GOPATH=$BUILD_DIR make_idmapper "$IDMAPPER_SRC_PATH"
-
-pushd "$GROOTFS_BIN_PATH"
-  ls -lf *.tgz | xargs -n1 tar -zxf
-  mv grootfs /opt/grootfs/bin/
-  mv drax /opt/grootfs/bin/
-  chmod 755 /opt/grootfs/bin/*
-popd
-echo "I AM GROOT" | grootsay
+GOPATH=$BUILD_DIR_PATH install_idmapper "$IDMAPPER_SRC_PATH"
+install_grootfs "$GROOTFS_BINS_PATH"
 
 cd src/code.cloudfoundry.org/guardian
 
 export PATH=/opt/grootfs/bin:$PATH
-
-## HACK TODO: remove
-chmod u+s /opt/grootfs/bin/newuidmap
-chmod u+s /opt/grootfs/bin/newgidmap
-permit_device_control
-
 export GARDEN_TEST_ROOTFS=/opt/warden/rootfs
 export GARDEN_FUSE_TEST_ROOTFS=/opt/warden/fuse-rootfs
 export GARDEN_NESTABLE_TEST_ROOTFS=/opt/warden/nestable-rootfs
@@ -101,4 +47,4 @@ export IMAGE_PLUGIN_PATH=/opt/grootfs/bin/grootfs
 [ -d /opt/warden/docker-registry-v2-rootfs ] && export GARDEN_DOCKER_REGISTRY_V2_TEST_ROOTFS=/opt/warden/docker-registry-v2-rootfs
 
 go vet ./...
-ginkgo -tags daemon -r -p -race -cover -keepGoing -nodes=4 "$@" gqt
+ginkgo -tags daemon -r -p -race -cover -keepGoing -nodes=4 "$@"
