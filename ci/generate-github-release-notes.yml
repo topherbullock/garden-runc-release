@@ -1,0 +1,16 @@
+---
+image_resource:
+  type: docker-image
+  source:
+      repository: cfgarden/garden-ci
+
+platform: linux
+
+inputs:
+  - name: groot-version
+
+outputs:
+  - name: github-release
+
+run:
+  path: gr-release-develop/ci/scripts/generete-github-release-notes
