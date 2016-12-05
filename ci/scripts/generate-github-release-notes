@@ -1,6 +1,6 @@
 #!/bin/bash
 
-GROOT_VERSIOa=$(cat ./groot-version/number)
+GROOT_VERSION=$(cat ./groot-version/number)
 if [ -z "$_GARDEN_VERSION" ]; then
   echo "missing grootfs version number"
   exit 1
