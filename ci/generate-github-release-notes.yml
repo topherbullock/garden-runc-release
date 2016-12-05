@@ -13,4 +13,4 @@ outputs:
   - name: github-release
 
 run:
-  path: gr-release-develop/ci/scripts/generete-github-release-notes
+  path: gr-release-develop/ci/scripts/generate-github-release-notes
