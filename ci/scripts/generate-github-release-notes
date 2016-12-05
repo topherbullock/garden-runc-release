@@ -1,9 +1,0 @@
-#!/bin/bash
-
-GROOT_VERSION=$(cat ./groot-version/number)
-if [ -z "$GROOT_VERSION" ]; then
-  echo "missing grootfs version number"
-  exit 1
-fi
-
-echo "* Verified with grootfs-release $GROOT_VERSION" > ../github-release/notes
