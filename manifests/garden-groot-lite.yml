@@ -23,6 +23,7 @@ jobs:
       - name: garden
     properties:
       garden:
+        experimental_rootless_mode: true
         default_container_rootfs: docker:///busybox:buildroot-2014.02
         graph_cleanup_threshold_in_mb: 1024
         listen_network: tcp

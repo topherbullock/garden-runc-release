@@ -76,6 +76,18 @@ function setup_apparmor() {
   fi
 }
 
+# we basically do the same as sysinfo:
+# https://github.com/cloudfoundry/guardian/blob/master/sysinfo/max_valid_uid.go#L36
+function getMaxUid() {
+  CONTAINER=$(cat /proc/self/uid_map | awk '{print $1}')
+  SIZE=$(cat /proc/self/uid_map | awk '{print $3}')
+  MAX=$(($CONTAINER+$SIZE-1))
+  echo $(( $MAX  < 0 ? 0: $MAX )) #>
+}
+
+
+
+
 case $1 in
 
   start)
@@ -124,12 +136,26 @@ case $1 in
     exec 1> >( tee -a $LOG_DIR/garden.stdout.log | logger -p user.info -t vcap.garden ) \
          2> >( tee -a $LOG_DIR/garden.stderr.log | logger -p user.error -t vcap.garden )
 
-   <% if p("garden.experimental_rootless_mode") %>
-     exec_command="exec chpst -u vcap:vcap"
-     echo $$ > $PIDFILE
-   <% else %>
-     exec_command="exec /var/vcap/packages/guardian/bin/the-secret-garden $DATA_DIR $real_graph $graph_path $PIDFILE"
-   <% end %>
+    /var/vcap/packages/guardian/bin/guardian-setup \
+      --iptables-bin=/var/vcap/packages/iptables/sbin/iptables \
+    <% if p("garden.destroy_containers_on_start") %> \
+      --destroy-containers-on-startup \
+    <% end %> \
+    <% if p("garden.allow_host_access") %> \
+      --allow-host-access \
+    <% end %> \
+    <% p("garden.deny_networks").each do |network| %> \
+      --deny-network=<%= network %> \
+    <% end %> \
+
+    <% if p("garden.experimental_rootless_mode") %>
+      useradd -u $(getMaxUid) -U maximus || true
+
+      exec_command="exec chpst -u maximus:maximus"
+      echo $$ > $PIDFILE
+    <% else %>
+      exec_command="exec /var/vcap/packages/guardian/bin/the-secret-garden $DATA_DIR $real_graph $graph_path $PIDFILE"
+    <% end %>
 
     $exec_command /var/vcap/packages/guardian/bin/guardian \
     <% if p("garden.listen_network") == "tcp" %> \
@@ -138,9 +164,6 @@ case $1 in
       --bind-port=<%= port %> \
     <% else %> \
       --bind-socket=<%= p("garden.listen_address") %> \
-    <% end %> \
-    <% if p("garden.experimental_rootless_mode") %>  \
-      --rootless \
     <% end %> \
       --depot=$depot_path \
       --graph=$graph_path \
