@@ -13,6 +13,7 @@ packages:
   - shadow
   - busybox
   - tar
+  - gdn
 
 properties:
   garden.listen_network:
