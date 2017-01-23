@@ -3,4 +3,5 @@ ROOT_DIR_PATH=$(cd $(dirname $0)/.. && pwd)
 
 gosub list \
   -a code.cloudfoundry.org/gdn/... \
-  -a github.com/vito/twentythousandtonnesofcrudeoil/...
+  -a code.cloudfoundry.org/guardian/... \
+  -a github.com/jteeuwen/go-bindata/...
