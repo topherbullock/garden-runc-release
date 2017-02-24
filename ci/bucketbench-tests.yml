@@ -1,0 +1,18 @@
+---
+image_resource:
+  type: docker-image
+  source: {repository: concourse/bin-ci, privileged: true }
+
+platform: linux
+
+inputs:
+- name: gr-release-develop
+- name: rootfs
+
+params:
+  GARDEN_ADDRESS: ""
+  DATADOG_API_KEY: ""
+  ENVIRONMENT: ""
+
+run:
+  path: gr-release-develop/ci/scripts/bucketbench-tests
