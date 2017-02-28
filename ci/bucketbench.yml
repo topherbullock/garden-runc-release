@@ -11,11 +11,9 @@ inputs:
 - name: gr-release-develop
 - name: gdn-linux-release
 
-outputs:
-- name: score
-
 params:
   LOG_LEVEL: error
+  BUCKETBENCH_THREADS: 5
 
 run:
   path: gr-release-develop/ci/scripts/bucketbench
