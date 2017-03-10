@@ -38,21 +38,15 @@ at the time of writing.
 
 ## How to start `gdn`
 
-We recommend running the following commands in a VM that you can later throw
+We recommend running the following commands as root in a VM that you can later throw
 away. 
 
 
 ```bash
-# mkdir -p $HOME/bin
-# export PATH=$PATH:$HOME/bin
-# wget https://github.com/contraband/gaol/releases/download/2016-8-22/gaol_linux -O $HOME/bin/gaol
-# chmod +x $HOME/bin/{gdn,gaol}
-# gdn -h
-# gaol -h
-
-# prepare your system as ROOT gdn
+# TODO provide version of gdn that supports rootless
 wget https://github.com/cloudfoundry/garden-runc-release/releases/download/v1.2.0/gdn-1.2.0 -O /usr/local/bin/gdn
-chmod +x /usr/local/bin/gdn
+wget https://github.com/contraband/gaol/releases/download/2016-8-22/gaol_linux -O /usr/local/bin/gaol
+chmod +x /usr/local/bin/{gdn,gaol}
 
 groupadd -g 4294967294 maximus
 useradd -g maximus -u 4294967294 -m -d /home/maximus -s /bin/bash maximus
@@ -71,18 +65,16 @@ gdn server --bind-port 7777 --bind-ip 0.0.0.0 \
         --image-plugin /var/vcap/packages/grootfs/bin/grootfs \
         --image-plugin-extra-arg="--config"  \
         --image-plugin-extra-arg="$HOME/grootfs_config.yml" \
+        --network-plugin /bin/true \
         --depot $HOME/depot \
         --assets-dir $HOME/bin  \
         --skip-setup
 
-# create a container
-gaol create -n test -r docker:///busybox
-# this is a container based on the Busybox Docker image, which will be
-#   downloaded from DockerHub.
+# create a container (not all public images from dockerhub will work at the moment due to ownership issues - we recommend using ubuntu)
+gaol create -n test -r docker:///ubuntu
 
 # run commands inside the container
-gaol run -a -c "ls -la" test
-# replace the contents of the -c flag with the command you want to run
+gaol run -a -c "echo hello" test
 
 # delete a container
 ./gaol destroy test
