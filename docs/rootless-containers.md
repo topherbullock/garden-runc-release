@@ -2,7 +2,7 @@
 
 With the latest release of Garden it is now possible to create and run processes
 in containers without requiring root privileges! This document details the various
-components that enable this to work, as well as a step-by-step guide for installing
+components that enable this to work, as well as providing a step-by-step guide for installing
 and configuring Garden to run as a non-root user.
 
 **HUGE DISCLAIMER**: Garden's support for rootless containers is still very much 
