@@ -6,7 +6,7 @@ components that enable this to work, as well as providing a step-by-step guide f
 and configuring Garden to run as a non-root user.
 
 **HUGE DISCLAIMER**: Garden's support for rootless containers is still very much 
-a work-in-progress at the moment and as such is subject to a number of known
+a work-in-progress at the moment, and as such is subject to a number of known
 limitations (see the end of this doc for details).
 
 ## Component Overview
