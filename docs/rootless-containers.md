@@ -78,7 +78,7 @@ rootless@ubuntu-xenial:~$ gdn server \
 As shown above, `gdn` is configurable and extensible via plugins. At the moment `gdn` provides
 a plugin interface for image and network management. The image plugin is fulfilled by `grootfs`
 (which is also able to run without root privileges) but the network plugin is essentially a no op...
-We'll be adding network support to rootless containers [shortly](https://www.pivotaltracker.com/story/show/14111013https://www.pivotaltracker.com/story/show/1411101333).
+We'll be adding network support to rootless containers [shortly](https://www.pivotaltracker.com/story/show/14111013).
 
 ## Step 3: Enjoy rootless containers
 
@@ -118,9 +118,9 @@ ubuntu@ubuntu-xenial:~$ gaol destroy my-rootless-container
 ## Known Limitations
 
 * There is currently no support for resource limiting
-* Rootless containers do not have any networking (but will do relatively soon)
+* Rootless containers do not have any networking (but will do relatively [soon](https://www.pivotaltracker.com/story/show/14111013))
 * `gdn` cannot currently run as _any_ non-root user, it must be run as the `rootless` user
-* You can only map 1 user into the container
+* You can only map 1 user into the container ((for now)[https://www.pivotaltracker.com/story/show/130628237])
 * Probably lots of other things as well
 
 ## Special Thanks
