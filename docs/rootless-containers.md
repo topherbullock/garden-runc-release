@@ -36,12 +36,7 @@ If you run into any issues along the way, feel free to chat to us on the
 The first step is to download and install `gdn` and `grootfs`. Note that `runc`
 does not need to be installed separately as it is bundled together as part of the
 `gdn` binary. The [install-rootless-gdn](../scripts/install-rootless-gdn) script
-can be used to get you started. This script will:
-
-* Create a new, non-root user named `rootless`
-* Install all required binaries to `/usr/local/bin/<binary name>`
-* Configure a BTRFS filesystem at `/var/lib/grootfs/btrfs`
-* Set permissions on dirs used by `gdn` and `grootfs`
+can be used to get started.
 
 **NB**: The commands in Step 1 must be run as the root user. The rootless fun doesn't begin until step 2!
 
@@ -49,6 +44,13 @@ can be used to get you started. This script will:
 ubuntu@ubuntu-xenial:~$ sudo su -
 root@ubuntu-xenial:~# curl "https://raw.githubusercontent.com/cloudfoundry/garden-runc-release/wip-140759953/scripts/install-rootless-gdn" | bash
 ```
+
+This script will:
+
+* Create a new, non-root user named `rootless`
+* Install all required binaries to `/usr/local/bin/<binary name>`
+* Configure a BTRFS filesystem at `/var/lib/grootfs/btrfs`
+* Set permissions on dirs used by `gdn` and `grootfs`
 
 Once the install script has completed, you'll need to run the `gdn setup` command:
 
