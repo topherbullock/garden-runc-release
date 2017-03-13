@@ -34,15 +34,15 @@ does not need to be installed separately as it is bundled together as part of th
 NB: All commands in Step 1 need to be run as the root user
 
 ```
-curl TODO | bash
+sudo su
+curl "https://raw.githubusercontent.com/cloudfoundry/garden-runc-release/wip-140759953/scripts/install-rootless-gdn" | bash
 gdn setup
 ```
-
-The `gdn setup` command configures cgroups and iptables.
 
 ## Step 2: Start the `gdn` server
 
 ```
+su - rootless
 gdn server \
   --image-plugin /usr/local/bin/grootfs \
   --image-plugin-extra-arg=--store \
@@ -50,6 +50,9 @@ gdn server \
   --network-plugin /bin/true \
   --skip-setup
 ```
+
+As shown above, `gdn` is configurable and extensible via plugins. At the moment `gdn` provides
+a plugin interface for image and network management.
 
 ## Step 3: Create a container
 
