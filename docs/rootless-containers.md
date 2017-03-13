@@ -119,7 +119,7 @@ ubuntu@ubuntu-xenial:~$ gaol destroy my-rootless-container
 
 * There is currently no support for resource limiting
 * Rootless containers do not have any networking (but will do relatively soon)
-* `gdn` cannot currently run as _any_ non-root user, it must be run as the `rootless` user (see below for how to configure this user)
+* `gdn` cannot currently run as _any_ non-root user, it must be run as the `rootless` user
 * You can only map 1 user into the container
 * Probably lots of other things as well
 
