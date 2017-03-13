@@ -1,7 +1,13 @@
 # Rootless containers in Garden
 
 With the latest release of Garden it is now possible to create and run processes
-in containers without requiring root privileges.
+in containers without requiring root privileges! This document details the various
+components that enable this to work, as well as a step-by-step guide for installing
+and configuring Garden to run as a non-root user.
+
+**HUGE DISCLAIMER**: Garden's support for rootless containers is still very much 
+a work-in-progress at the moment and as such is subject to a number of known
+limitations (see below for further info).
 
 ## Component Overview
 
@@ -12,6 +18,15 @@ with Garden.
 the container engine powering [Cloud Foundry](https://www.cloudfoundry.org/) and [Concourse CI](http://concourse.ci/).
 * `grootfs` - a daemonless container image manager.
 * `runc` - a CLI tool for spawning and running containers according to the OCI specification.
+
+## Known Limitations
+
+* There is currently no support for resource limiting
+* Rootless containers do not have any networking
+* `gdn` cannot currently run as _any_ non-root user, it must be run as the `rootless` user (see below for how to configure this user)
+* You can only map 1 user into the container
+* Probably lots of other things as well
+
 
 # Getting Started
 
@@ -31,19 +46,21 @@ The first step is to download and install `gdn` and `grootfs`. Note that `runc`
 does not need to be installed separately as it is bundled together as part of the
 `gdn` binary.
 
-NB: All commands in Step 1 need to be run as the root user
+**NB**: The commands in Step 1 must be run as the root user. The rootless fun doesn't begin until step 2!
 
 ```
-sudo su
-curl "https://raw.githubusercontent.com/cloudfoundry/garden-runc-release/wip-140759953/scripts/install-rootless-gdn" | bash
-gdn setup
+root@ubuntu-xenial:~# curl "https://raw.githubusercontent.com/cloudfoundry/garden-runc-release/wip-140759953/scripts/install-rootless-gdn" | bash
+root@ubuntu-xenial:~# gdn setup
 ```
 
 ## Step 2: Start the `gdn` server
 
+**NB**: The commands in Step 2 must be run as the rootless user.
+
 ```
-su - rootless
-gdn server \
+rootless@ubuntu-xenial:~$ gdn server \
+  --bind-ip 0.0.0.0 \
+  --bind-port 7777 \
   --image-plugin /usr/local/bin/grootfs \
   --image-plugin-extra-arg=--store \
   --image-plugin-extra-arg=/var/lib/grootfs/btrfs \
@@ -52,11 +69,12 @@ gdn server \
 ```
 
 As shown above, `gdn` is configurable and extensible via plugins. At the moment `gdn` provides
-a plugin interface for image and network management.
+a plugin interface for image and network management. The image plugin is fulfilled by `grootfs` and
+the image plugin is fulfilled by `/bin/true`.
 
 ## Step 3: Create a container
 
-The `gaol` CLI can be used to interact with the `gdn` server.
+**NB**: The commands from Step 3 onwards can be run as any user.
 
 ```
 gaol create -n my-rootless-container -r docker:///busybox
@@ -70,3 +88,7 @@ gaol run my-rootless-container -a -c "sh -c 'exit 13'"
 ```
 
 ## Step 5: Destroy the container
+
+```
+gaol destroy my-rootless-container
+```
