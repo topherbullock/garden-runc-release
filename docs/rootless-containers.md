@@ -126,5 +126,5 @@ gaol destroy my-rootless-container
 ## Special Thanks
 
 A huge thanks to the [OCI community](https://www.opencontainers.org/) (and
-especially [Aleksa Sarai](https://github.com/cyphar) for their hard work and support
+especially [Aleksa Sarai](https://github.com/cyphar)) for their hard work and support
 in making rootless containers a reality.
