@@ -205,3 +205,6 @@
 	path = src/github.com/opencontainers/selinux
 	url = https://github.com/opencontainers/selinux
 	branch = master
+[submodule "src/github.com/microsoft/hcsshim"]
+	path = src/github.com/microsoft/hcsshim
+	url = https://github.com/microsoft/hcsshim.git
