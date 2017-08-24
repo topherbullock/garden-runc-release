@@ -1,0 +1,31 @@
+- type: replace
+  path: /releases/-
+  value:
+    name: cf-networking
+    version: 1.5.0
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-networking-release?v=1.5.0
+    sha1: 4244a6e99e24748d4b0161f18f804859cdb4391c
+
+- type: replace
+  path: /instance_groups/0/jobs/name=garden/properties/garden/network_plugin?
+  value: /var/vcap/packages/runc-cni/bin/garden-external-networker
+
+- type: replace
+  path: /instance_groups/0/jobs/name=garden/properties/garden/network_plugin_extra_args?
+  value: ["--configFile","/var/vcap/jobs/garden-cni/config/adapter.json"]
+
+- type: replace
+  path: /instance_groups/0/jobs/-
+  value:
+    name: garden-cni
+    release: cf-networking
+    properties:
+      cf_networking:
+        cni_plugin_dir: /var/vcap/packages/bridge-cni/bin
+        cni_config_dir: /var/vcap/jobs/cni/config
+
+- type: replace
+  path: /instance_groups/0/jobs/-
+  value:
+    name: cni
+    release: garden-runc

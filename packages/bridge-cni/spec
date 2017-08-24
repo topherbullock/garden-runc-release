@@ -1,0 +1,8 @@
+---
+name: bridge-cni
+
+dependencies:
+  - golang
+
+files:
+  - github.com/containernetworking/plugins/**/*

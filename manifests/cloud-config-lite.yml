@@ -1,5 +1,9 @@
 vm_types:
 - name: container
+  env:
+    bosh:
+      ipv6:
+        enable: true
 
 networks:
 - name: lite

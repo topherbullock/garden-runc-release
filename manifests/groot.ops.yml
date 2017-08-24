@@ -33,5 +33,5 @@
     release: grootfs
     properties:
       grootfs:
-        store_size_bytes: 524288000
+        store_size_bytes: 1073741824
         json_output: true

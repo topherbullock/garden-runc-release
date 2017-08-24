@@ -1,0 +1,10 @@
+---
+name: cni
+
+templates:
+  30-bridge.conf.erb: config/30-bridge.conf
+
+packages:
+  - bridge-cni
+
+properties: {}
