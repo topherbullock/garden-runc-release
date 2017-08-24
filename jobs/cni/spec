@@ -2,6 +2,7 @@
 name: cni
 
 templates:
+  pre-start.erb: bin/pre-start
   30-bridge.conf.erb: config/30-bridge.conf
 
 packages:

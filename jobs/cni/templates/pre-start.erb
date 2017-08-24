@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+
+chmod 4755 /var/vcap/packages/bridge-cni/bin/{bridge,host-local}
+chmod 4755 /var/vcap/packages/runc-cni/bin/garden-external-networker || true
