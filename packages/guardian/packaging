@@ -20,3 +20,5 @@ pushd code.cloudfoundry.org/guardian/rundmc/nstar
 make
 mv nstar ${BOSH_INSTALL_TARGET}/bin
 popd
+
+cp scroot ${BOSH_INSTALL_TARGET}/bin/

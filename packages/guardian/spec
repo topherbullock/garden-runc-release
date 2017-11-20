@@ -5,6 +5,7 @@ dependencies:
   - golang
 
 files:
+  - scroot
   - code.cloudfoundry.org/guardian/rundmc/nstar/*
   - github.com/opencontainers/runc/libcontainer/utils/*
   - github.com/opencontainers/runc/vendor/golang.org/x/sys/unix/*

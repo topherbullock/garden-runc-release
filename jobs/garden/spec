@@ -7,6 +7,7 @@ templates:
   envs.erb: bin/envs
   garden-default.erb: config/garden-default
   auplink: bin/auplink
+  scroot.yml: config/scroot.yml
 
 packages:
   - guardian

@@ -1,0 +1,9 @@
+- type: replace
+  path: /instance_groups/0/jobs/0/properties/garden/image_plugin?
+  value: /var/vcap/packages/guardian/bin/scroot
+
+- type: replace
+  path: /instance_groups/0/jobs/0/properties/garden/image_plugin_extra_args?
+  value:
+    - --config
+    - /var/vcap/jobs/garden/config/scroot.yml

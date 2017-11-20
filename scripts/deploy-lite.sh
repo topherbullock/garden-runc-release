@@ -7,6 +7,7 @@ bosh -n update-cloud-config manifests/cloud-config-lite.yml
 bosh -n -e "${BOSH_ENVIRONMENT:-lite}" -d garden-runc deploy --no-redact \
   -l manifests/bosh-lite.vars.yml \
   -o manifests/local-garden-runc-release.ops.yml \
+  -o manifests/scroot.ops.yml \
   "$@" \
   manifests/garden-runc.yml
 )
